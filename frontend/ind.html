@@ -1,0 +1,91 @@
+```html
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Add Book</h2>
+
+<input id="title" placeholder="Title"><br>
+<input id="author" placeholder="Author"><br>
+<input id="year" placeholder="Year" type="date"><br>
+<input id="price" placeholder="Price" type="number"><br>
+
+<button onclick="addBook()">Add Book</button>
+<button onclick="fetchBooks()">Fetch Books</button>
+
+<h2>Book List</h2>
+<ul id="bookList"></ul>
+
+<script>
+async function addBook() {
+  const book = {
+    title: document.getElementById('title').value,
+    author: document.getElementById('author').value,
+    publishedYear: document.getElementById('year').value,
+    price: document.getElementById('price').value
+  };
+
+  await fetch('http://localhost:3001/add/books', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(book)
+  });
+
+  alert("Book Added");
+  fetchBooks();
+}
+
+async function fetchBooks() {
+  const response = await fetch('http://localhost:3001/add/books');
+  const books = await response.json();
+
+  const list = document.getElementById('bookList');
+  list.innerHTML = '';
+
+  books.forEach(book => {
+    const li = document.createElement('li');
+    li.innerText = book.title + " - " + book.author + " | Issued: " + book.issued + " ";
+
+    // Delete button
+    const delBtn = document.createElement('button');
+    delBtn.innerText = "Delete";
+    delBtn.onclick = () => deleteBook(book._id);
+
+    // Issue / Return button
+    const issueBtn = document.createElement('button');
+    issueBtn.innerText = book.issued ? "Return" : "Issue";
+    issueBtn.onclick = () => toggleIssued(book._id, !book.issued);
+
+    li.appendChild(issueBtn);
+    li.appendChild(delBtn);
+    list.appendChild(li);
+  });
+}
+
+async function deleteBook(id) {
+  await fetch(`http://localhost:3001/add/books/${id}`, {
+    method: 'DELETE'
+  });
+
+  fetchBooks();
+}
+
+async function toggleIssued(id, issuedStatus) {
+  await fetch(`http://localhost:3001/add/books/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      issued: issuedStatus
+    })
+  });
+
+  fetchBooks();
+}
+</script>
+
+</body>
+</html>
